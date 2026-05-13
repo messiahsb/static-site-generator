@@ -1,7 +1,7 @@
 import unittest
 
 from textnode import TextNode, TextType, text_node_to_html_node
-from split_delimiter import split_nodes_delimiter
+from inline_split_delimiter import split_nodes_delimiter
 
 
 class TestTextNode(unittest.TestCase):
@@ -100,6 +100,6 @@ class TestTextNode(unittest.TestCase):
             ],
             new_nodes,
         )
-        
+
 if __name__ == "__main__":
     unittest.main()
