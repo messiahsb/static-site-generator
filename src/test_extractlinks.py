@@ -1,6 +1,6 @@
 import unittest
 
-from extract_links import extract_markdown_links, extract_markdown_images
+from markdown_parsers import extract_markdown_links, extract_markdown_images
 
 class TestTextNode(unittest.TestCase):
     def test_bold(self):
