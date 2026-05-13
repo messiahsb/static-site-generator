@@ -2,7 +2,7 @@ import unittest
 
 from markdown_parsers import extract_markdown_links, extract_markdown_images
 
-class TestTextNode(unittest.TestCase):
+class TestExtractLink(unittest.TestCase):
     def test_bold(self):
         pass
 
