@@ -1,6 +1,6 @@
 import unittest
 
-from markdown_parsers import extract_markdown_links, extract_markdown_images
+from inline_parser import extract_markdown_links, extract_markdown_images
 
 class TestExtractLink(unittest.TestCase):
     def test_bold(self):

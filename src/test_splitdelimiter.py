@@ -1,7 +1,7 @@
 import unittest
 
 from textnode import TextNode, TextType, text_node_to_html_node
-from markdown_parsers import split_nodes_delimiter
+from inline_parser import split_nodes_delimiter
 
 
 class TestTextNode(unittest.TestCase):

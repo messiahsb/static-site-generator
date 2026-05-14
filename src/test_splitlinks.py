@@ -1,7 +1,7 @@
 import unittest
 
 from textnode import TextNode, TextType
-from markdown_parsers import split_nodes_image, split_nodes_link
+from inline_parser import split_nodes_image, split_nodes_link
 
 class TestLinktoNode(unittest.TestCase):
     def test_split_images(self):
@@ -68,10 +68,19 @@ class TestLinktoNode(unittest.TestCase):
             ],
             new_nodes,
         )
+    
+    def test_split_image_single(self):
+        node = TextNode(
+            "![image](https://www.example.COM/IMAGE.PNG)",
+            TextType.TEXT,
+        )
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual(
+            [
+                TextNode("image", TextType.IMAGE, "https://www.example.COM/IMAGE.PNG"),
+            ],
+            new_nodes,
+        )
 if __name__ == "__main__":
     unittest.main()
 
-node = TextNode(
-    "This is text with a link ![to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev). Please click on each link",
-    TextType.TEXT,
-)
