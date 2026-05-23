@@ -1,7 +1,9 @@
 
 import unittest
 
-from text_to_textnodes import text_to_textnodes, TextNode, TextType, split_nodes_delimiter, split_nodes_image, split_nodes_link
+from inline_parser import text_to_textnodes
+from textnode import TextNode, TextType
+
 
 class TestTextToNodes(unittest.TestCase):
     def test_with_all_thethings(self):

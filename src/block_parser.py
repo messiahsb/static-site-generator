@@ -2,7 +2,8 @@
 from enum import Enum
 
 from htmlnode import HTMLNode, LeafNode, ParentNode
-from textnode import text_to_textnodes, text_node_to_html_node   
+from textnode import TextNode, TextType, text_node_to_html_node   
+from inline_parser import split_nodes_delimiter, text_to_textnodes
 
 class BlockType(Enum):
     PARAGRAPH = "paragraph"
@@ -64,50 +65,117 @@ def  block_to_block_type(block):
     return BlockType.PARAGRAPH
 
 
+#takes blocks defined in previous functions and converts them to html nodes
+def markdown_to_html_node(markdown):
+    indiv = []
+    blocks = markdown_to_blocks(markdown)
+
+    for block in blocks:
+        block_type = block_to_block_type(block)
+        new_node = create_new_htmlnode(block, block_type)
+        # code blocks need to be left unaltered by inline parsing
+        if block_type == BlockType.UNORDERED_LIST or block_type == BlockType.ORDERED_LIST:
+            list_children = text_to_list_children(block, block_type)
+            new_node.children.extend(list_children)
+
+        elif block_type == BlockType.CODE:   
+            cleaned_text = clean_text_for_html(block, block_type)
+            code_node = TextNode(cleaned_text, TextType.CODE)
+            new_node.children.append(text_node_to_html_node(code_node))
+        else:
+            cleaned_text = clean_text_for_html(block, block_type)
+            new_node.children.extend(text_to_children(cleaned_text))
+
+
+        indiv.append(new_node)
+    div = ParentNode("div", children=indiv)
+    return div
+        
 # helper function for markdown to html node
 def create_new_htmlnode(block, blocktype):
-    num_tags = block.count('#')
     match (blocktype):
         case (BlockType.QUOTE):
-         return HTMLNode("blockquote")
+         return ParentNode("blockquote", [])
         case (BlockType.CODE):
-         return HTMLNode("pre",children=[HTMLNode("code", block)])
+         return ParentNode("pre", [])
         case (BlockType.HEADING):
-         return HTMLNode(f"h{num_tags}")
+            # block.count('#')
+            num_tags = 0
+            for  n in  block:
+                if n == "#":
+                  num_tags+=1 
+                else:
+                  break
+            return ParentNode(f"h{num_tags}", [])
         case (BlockType.UNORDERED_LIST):
-         return HTMLNode("ul")
+         return ParentNode("ul", [])
         case (BlockType.ORDERED_LIST):
-         return HTMLNode("ol")
+         return ParentNode("ol", [])
         case (BlockType.PARAGRAPH):
-         return HTMLNode("p")
+         return ParentNode("p",[])
         case _:
-         raise Exception("Not Expected BlockType") 
+          raise Exception("Not Expected BlockType")
+
+def clean_text_for_html(block, blocktype):
+     match (blocktype):
+        case (BlockType.QUOTE):
+            lines = block.split('\n')
+            cleaned_text = " ".join(line.strip('>').strip() for line in lines)
+            return cleaned_text
+        case (BlockType.HEADING):
+            num_tags = 0
+            for n in block:
+                if n == "#":
+                  num_tags+=1 
+                else:
+                  break
+            # +1 to clean the space after the #
+            cleaned_text = block[num_tags+1:]
+            return cleaned_text
+        case (BlockType.CODE):
+            cleaned_text = block[4:-3]
+            return cleaned_text
+        case (BlockType.PARAGRAPH):
+            lines = block.split('\n')
+            cleaned_text = " ".join(line.strip() for line in lines)
+            return cleaned_text
+        case _:
+         raise Exception("Not Expected BlockType")      
+        # case (BlockType.UNORDERED_LIST):
+        #     lines = block.split('\n')
+        #     cleaned_text = ""
+        #     for idx, line in enumerate(lines):
+        #          line = line[2:]
+        #     return cleaned_text
+        # case (BlockType.ORDERED_LIST):
+        #     lines = block.split('\n')
+        #     cleaned_text = ""
+        #     for idx, line in enumerate(lines):
+        #          line = line.split(". ", 1)[1]
+        #     return cleaned_text
 
 # helper function for markdown to html node to create child nodes
 def text_to_children(text):
     children = []
     text_nodes = text_to_textnodes(text)
     for node in text_nodes:
-       children.append(text_node_to_html_node(node))
+           children.append(text_node_to_html_node(node))
+    return children
+# helper function for markdown to html node to create child nodes
+def text_to_list_children(text, blocktype):
+    children = []
+    lines = text.split('\n')
+    for line in lines:
+        # strip leading markers
+        if blocktype == (BlockType.UNORDERED_LIST):
+            line = line[2:]
+        elif blocktype ==  (BlockType.ORDERED_LIST):
+                line = line.split(". ", 1)[1]
 
-
-#takes blocks defined in previous functions and converts them to html nodes
-def markdown_to_html_node(markdown):
-    blocks = markdown_to_blocks(markdown)
-    for block in blocks:
-        block_type = block_to_block_type(block)
-        new_node = create_new_htmlnode(block, block_type)
-        new_node.children = text_to_children(block)
-        
-        print(new_node)
-
-
-md = """
-This is **bolded** paragraph
-text in a p
-tag here
-
-This is another paragraph with _italic_ text and `code` here
-
-"""
-markdown_to_html_node(md)
+        # each line in a list should be built with li for each line
+        listparent  = ParentNode("li", children=[])
+        text_nodes = text_to_textnodes(line)
+        for node in text_nodes:
+            listparent.children.append(text_node_to_html_node(node))
+        children.append(listparent)
+    return children
