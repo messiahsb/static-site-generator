@@ -1,4 +1,3 @@
-from htmlnode import LeafNode, ParentNode
 from textnode import TextNode, TextType
 import re
 

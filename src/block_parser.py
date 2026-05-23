@@ -1,6 +1,8 @@
 
 from enum import Enum
 
+from htmlnode import HTMLNode, LeafNode, ParentNode
+
 
 class BlockType(Enum):
     PARAGRAPH = "paragraph"
@@ -10,6 +12,7 @@ class BlockType(Enum):
     UNORDERED_LIST = "unordered list"
     ORDERED_LIST = "ordered list"
 
+#takes mark down text and returns a list of text blocks
 def markdown_to_blocks(markdown):
     blocks = markdown.split("\n\n")
     return_blocks = []
@@ -19,6 +22,7 @@ def markdown_to_blocks(markdown):
 
     return return_blocks
 
+#takes a block of markdown text and returns the type of block it is, code/italics/bold/etc..
 def  block_to_block_type(block):
 
 
@@ -60,7 +64,41 @@ def  block_to_block_type(block):
     return BlockType.PARAGRAPH
 
 
+# helper function for markdown to html node
+def create_new_htmlnode(block, blocktype):
+    num_tags = block.count('#')
+    match (blocktype):
+        case (BlockType.QUOTE):
+         return HTMLNode("blockquote", block)
+        case (BlockType.CODE):
+         return HTMLNode("pre", block)
+        case (BlockType.HEADING):
+         return HTMLNode(f"h{num_tags}", block)
+        case (BlockType.UNORDERED_LIST):
+         return HTMLNode("ul", block)
+        case (BlockType.ORDERED_LIST):
+         return HTMLNode("ol", block)
+        case (BlockType.PARAGRAPH):
+         return HTMLNode("p", block)
+        case _:
+         raise Exception("Not Expected BlockType") 
+
+
+#takes blocks defined in previous functions and converts them to html nodes
 def markdown_to_html_node(markdown):
     blocks = markdown_to_blocks(markdown)
     for block in blocks:
-        
+        block_type = block_to_block_type(block)
+        new_node = create_new_htmlnode(block, block_type)
+        print(new_node)
+
+
+md = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+This is another paragraph with _italic_ text and `code` here
+
+"""
+markdown_to_html_node(md)
