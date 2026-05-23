@@ -2,7 +2,7 @@
 from enum import Enum
 
 from htmlnode import HTMLNode, LeafNode, ParentNode
-
+from textnode import text_to_textnodes, text_node_to_html_node   
 
 class BlockType(Enum):
     PARAGRAPH = "paragraph"
@@ -69,19 +69,26 @@ def create_new_htmlnode(block, blocktype):
     num_tags = block.count('#')
     match (blocktype):
         case (BlockType.QUOTE):
-         return HTMLNode("blockquote", block)
+         return HTMLNode("blockquote")
         case (BlockType.CODE):
-         return HTMLNode("pre", block)
+         return HTMLNode("pre",children=[HTMLNode("code", block)])
         case (BlockType.HEADING):
-         return HTMLNode(f"h{num_tags}", block)
+         return HTMLNode(f"h{num_tags}")
         case (BlockType.UNORDERED_LIST):
-         return HTMLNode("ul", block)
+         return HTMLNode("ul")
         case (BlockType.ORDERED_LIST):
-         return HTMLNode("ol", block)
+         return HTMLNode("ol")
         case (BlockType.PARAGRAPH):
-         return HTMLNode("p", block)
+         return HTMLNode("p")
         case _:
          raise Exception("Not Expected BlockType") 
+
+# helper function for markdown to html node to create child nodes
+def text_to_children(text):
+    children = []
+    text_nodes = text_to_textnodes(text)
+    for node in text_nodes:
+       children.append(text_node_to_html_node(node))
 
 
 #takes blocks defined in previous functions and converts them to html nodes
@@ -90,6 +97,8 @@ def markdown_to_html_node(markdown):
     for block in blocks:
         block_type = block_to_block_type(block)
         new_node = create_new_htmlnode(block, block_type)
+        new_node.children = text_to_children(block)
+        
         print(new_node)
 
 
