@@ -1,8 +1,12 @@
 import os
 import shutil
 
+from block_parser import markdown_to_html_node
+
 def main():
     get_files_from('static', "public")
+    generate_page("content/index.md", "template.html", "public/index.html")
+
 def get_files_from(src, dest):
     # check if both src and dest exist
     if not os.path.exists(src):
@@ -11,6 +15,7 @@ def get_files_from(src, dest):
         os.mkdir(dest)
 
     # delet all contents of destination directory
+    print("deleting public directory")
     shutil.rmtree(dest)
     os.mkdir(dest)
 
@@ -32,4 +37,36 @@ def move_files(src, dest):
         # log path of each file copies
     
     return os.path.exists(src)
+
+def extract_title(markdown):
+    lines = markdown.split("\n")
+    heading = ""
+    for line in lines:
+        if line.startswith("# "):
+            heading = line.split("# ")[1]
+            break
+    
+    if heading == "":
+        raise Exception("No header found")
+    return heading
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    with open(from_path) as file:
+        from_content = file.read()
+
+    with open(template_path) as file:
+        template_content = file.read()
+
+    html_from_md = markdown_to_html_node(from_content).to_html()
+    title_from_md = extract_title(from_content)
+
+    template_content = template_content.replace("{{ Content }}", html_from_md)
+    template_content = template_content.replace("{{ Title }}", title_from_md)
+
+   
+
+    with open(dest_path, "w") as file:
+        file.write(template_content)
+    
 main()
