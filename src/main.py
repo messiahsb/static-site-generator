@@ -2,13 +2,13 @@ import os
 import shutil
 
 def main():
-    get_files_from('src', "public")
+    get_files_from('static', "public")
 def get_files_from(src, dest):
     # check if both src and dest exist
     if not os.path.exists(src):
         raise Exception("src directory not found")
     if not os.path.exists(dest):
-        raise Exception("dest directory not found")
+        os.mkdir(dest)
 
     # delet all contents of destination directory
     shutil.rmtree(dest)
@@ -20,13 +20,15 @@ def get_files_from(src, dest):
 def move_files(src, dest):
     # loop through files and directories of src to copy into public
     for idx in os.listdir(src):
-        print(idx)
-        if os.path.isfile(idx):
-            shutil.copy(idx, dest)
-        if os.path.isdir(idx):
-            new_path = os.path.join(dest, idx) 
-            os.mkdir(new_path)
-            move_files(idx, new_path)
+        src_path = os.path.join(src, idx)
+        dest_path = os.path.join(dest, idx)
+        if os.path.isfile(src_path):
+            print(f"copying file {src_path} to {dest_path}")
+            shutil.copy(src_path, dest)
+        if os.path.isdir(src_path):
+            print(f"copying directory {src_path} to {dest_path}")
+            os.mkdir(dest_path)
+            move_files(src_path, dest_path)
         # log path of each file copies
     
     return os.path.exists(src)
