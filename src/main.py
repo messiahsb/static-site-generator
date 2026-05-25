@@ -5,7 +5,7 @@ from block_parser import markdown_to_html_node
 
 def main():
     get_files_from('static', "public")
-    generate_page("content/index.md", "template.html", "public/index.html")
+    generate_pages_recursive("content", "template.html", "public")
 
 def get_files_from(src, dest):
     # check if both src and dest exist
@@ -68,5 +68,20 @@ def generate_page(from_path, template_path, dest_path):
 
     with open(dest_path, "w") as file:
         file.write(template_content)
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+
+    for idx in os.listdir(dir_path_content):
+        content_path = os.path.join(dir_path_content, idx)
+        if os.path.isfile(content_path):
+            html_path = idx[:-3]+".html"
+            dest_path = os.path.join(dest_dir_path, html_path)
+            print(f"generating file {content_path} to {dest_path}")
+            generate_page(content_path, template_path, dest_path)
+        if os.path.isdir(content_path):
+            dest_path = os.path.join(dest_dir_path, idx)
+            print(f"moving into dir directory {content_path} to {dest_path}")
+            os.mkdir(dest_path)
+            generate_pages_recursive(content_path, template_path, dest_path)
     
 main()
