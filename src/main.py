@@ -7,6 +7,7 @@ from block_parser import markdown_to_html_node
 
 def main():
     args = sys.argv
+    print(args)
     if len(args) == 1:
         basepath = '/'
     else:
